@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "conexion"
+		},
+		{
+			"path": "../controlador"
+		}
+	],
+	"settings": {}
+}
