@@ -92,15 +92,13 @@ if (!file_put_contents($_SERVER['DOCUMENT_ROOT'] . $ruta_completa_imagen, $image
 }
 
 // Conexión a la base de datos
-$servername = "localhost";
-$username = "root";
-$password = "1234"; // Asegúrate de colocar la contraseña correcta aquí
-$dbname = "androidbd";
-$conn = new mysqli($servername, $username, $password, $dbname);
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
+$conexionBase = new ConexionBase();
+$mysqli = $conexionBase->getConnection();
 
 // Verificar la conexión a la base de datos
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "error_message" => "Error: Conexión fallida: " . $conn->connect_error]);
+if ($mysqli->connect_error) {
+    echo json_encode(["success" => false, "error_message" => "Error: Conexión fallida: " . $mysqli->connect_error]);
     exit;
 }
 
@@ -108,9 +106,8 @@ if ($conn->connect_error) {
 $sql = "UPDATE platos SET nombre = ?, descripcion = ?, precio = ?, imagen = ? WHERE id_plato = ?";
 
 // Prepara una sentencia SQL
-$stmt = $conn->prepare($sql);
+$stmt = $mysqli->prepare($sql);
 $ruta_completa_imagen = "http://localhost" . $ruta_completa_imagen;
-error_log("Ruta Imagen: " . $ruta_completa_imagen);
 
 // Vincular los parámetros
 $stmt->bind_param("ssdsi", $nombre, $descripcion, $precio, $ruta_completa_imagen, $plato_id);
@@ -126,5 +123,5 @@ if ($stmt->execute()) {
 
 // Cierra la conexión a la base de datos
 $stmt->close();
-$conn->close();
+$conexionBase->closeConnection();
 ?>

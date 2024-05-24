@@ -1,15 +1,16 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "1234";
-$database = "androidbd";
 
-// Crear una conexión
-$conn = new mysqli($servername, $username, $password, $database);
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
+
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
+
+// Obtener la conexión
+$conn = $conexionBase->getConnection();
 
 // Verificar la conexión
 if ($conn->connect_error) {
-    die("Error de conexión: " . $conn->connect_error);
+    die("Conexión a la base de datos fallida: " . $conn->connect_error);
 }
 
 // Verifica si se recibió el parámetro 'restaurante_id' en la solicitud

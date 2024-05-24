@@ -125,23 +125,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit; // Termina el script
     }
 
-    // Conexión a la base de datos
-    $servername = "localhost";
-    $username = "root";
-    $password = "1234";
-    $dbname = "androidbd";
+    
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
 
-    // Verifica la conexión a la base de datos
-    if ($conn->connect_error) {
-        $response = array(
-            "error_code" => 500,
-            "error_message" => "Error: Conexión fallida: " . $conn->connect_error
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
+// Obtener la conexión
+$conn = $conexionBase->getConnection();
+
+// Verificar la conexión
+if ($conn->connect_error) {
+    die("Conexión a la base de datos fallida: " . $conn->connect_error);
+}
 
     // Prepara la consulta SQL para insertar datos en la tabla "bebidas"
     $sql = "INSERT INTO bebidas (id_rest, nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?, ?)";

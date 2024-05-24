@@ -6,7 +6,14 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-$mysqli = new mysqli("localhost", "root", "1234", "androidbd");
+
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
+
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
+
+// Obtener la conexión
+$mysqli = $conexionBase->getConnection();
 
 if ($mysqli->connect_error) {
     die("Error en la conexión: " . $mysqli->connect_error);

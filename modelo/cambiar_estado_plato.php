@@ -1,15 +1,16 @@
 <?php
-// Conexión a la base de datos (ajusta las credenciales según tu configuración)
-$servername = "localhost";
-$username = "root";
-$password = "1234";
-$database = "androidbd";
 
-$conn = new mysqli($servername, $username, $password, $database);
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
 
-// Verifica la conexión a la base de datos
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
+
+// Obtener la conexión
+$conn = $conexionBase->getConnection();
+
+// Verificar la conexión
 if ($conn->connect_error) {
-    die("Error de conexión a la base de datos: " . $conn->connect_error);
+    die("Conexión a la base de datos fallida: " . $conn->connect_error);
 }
 
 // Obtiene el ID del plato desde la solicitud GET

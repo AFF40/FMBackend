@@ -1,15 +1,16 @@
 <?php
-// Conexión a la base de datos (debes completar los detalles de la conexión)
-$servername = "localhost";
-$username = "root";
-$password = "1234";
-$dbname = "androidbd";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
 
-// Verifica si la conexión a la base de datos fue exitosa
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
+
+// Obtener la conexión
+$conn = $conexionBase->getConnection();
+
+// Verificar la conexión
 if ($conn->connect_error) {
-    die("Error en la conexión a la base de datos: " . $conn->connect_error);
+    die("Conexión a la base de datos fallida: " . $conn->connect_error);
 }
 
 // Obtén los parámetros GET
