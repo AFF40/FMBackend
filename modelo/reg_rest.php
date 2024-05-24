@@ -78,7 +78,7 @@ if ($result->num_rows > 0) {
             $imagenDecodificada = base64_decode($_POST['imagen']);
             $nombreImagen = uniqid('img_') . '.jpg';
             $rutaFisicaImagen = $directorioIconos . '/' . $nombreImagen;
-            $rutaImagen = "/foodmapsBD/restaurantes/$carpetaRest/iconos/$nombreImagen";
+            $rutaImagen = "http://" . $_SERVER['HTTP_HOST'] . "/foodmapsBD/restaurantes/$carpetaRest/iconos/$nombreImagen";  // Usar la URL completa
 
             if (file_put_contents($rutaFisicaImagen, $imagenDecodificada)) {
                 $sql_insert_restaurante = "INSERT INTO restaurantes (id_usuario, nom_rest, ubicacion, celular, tematica, imagen) VALUES (?, ?, ?, ?, ?, ?)";

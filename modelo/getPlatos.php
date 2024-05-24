@@ -26,7 +26,7 @@ JOIN menus m ON mp.id_menu = m.id_menu JOIN restaurantes res ON m.id_rest = res.
 WHERE p.id_rest AND res.id_rest = '$restaurante_id';";
 
 $result = $conn->query($sql);
-
+    
 if (!$result) {
     die("Error en la consulta: " . $conn->error);
 }

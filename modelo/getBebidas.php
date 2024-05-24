@@ -20,7 +20,9 @@ if (isset($_GET['restaurante_id'])) {
 }
 
 // Realiza la consulta SQL para obtener las bebidas del restaurante
-$sql = "SELECT b.*, m.*, mb.* FROM bebidas b JOIN menu_bebidas mb ON b.id_bebida = mb.id_bebida JOIN menus m ON mb.id_menu = m.id_menu WHERE m.id_rest = '$restaurante_id';";
+$sql = "SELECT b.*, m.*, mb.* , res.id_rest FROM bebidas b JOIN menu_bebidas mb ON b.id_bebida = mb.id_bebida 
+JOIN menus m ON mb.id_menu = m.id_menu JOIN restaurantes res ON m.id_rest = res.id_rest 
+WHERE b.id_rest AND res.id_rest = '$restaurante_id';";
 
 $result = $conn->query($sql);
 

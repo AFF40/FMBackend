@@ -2,7 +2,7 @@
 // Conexión a la base de datos (ajusta las credenciales según tu configuración)
 $servername = "localhost";
 $username = "root";
-$password = "";
+$password = "1234";
 $database = "androidbd";
 
 $conn = new mysqli($servername, $username, $password, $database);
@@ -17,7 +17,7 @@ if (isset($_GET['id_comida'])) {
     $id_comida = $_GET['id_comida'];
 
     // Consulta para obtener el valor actual de "disponible"
-    $selectQuery = "SELECT disponible FROM platos WHERE id_comida = $id_comida";
+    $selectQuery = "SELECT disponible FROM platos WHERE id_plato = $id_comida"; 
     
     $result = $conn->query($selectQuery);
 
@@ -27,9 +27,9 @@ if (isset($_GET['id_comida'])) {
 
         // Actualiza el estado del plato
         if ($disponible == 1) {
-            $updateQuery = "UPDATE platos SET disponible = 0 WHERE id_comida = $id_comida ";
+            $updateQuery = "UPDATE platos SET disponible = 0 WHERE id_plato = $id_comida ";
         } else {
-            $updateQuery = "UPDATE platos SET disponible = 1 WHERE id_comida = $id_comida ";
+            $updateQuery = "UPDATE platos SET disponible = 1 WHERE id_plato = $id_comida ";
         }
 
         if ($conn->query($updateQuery) === TRUE) {
