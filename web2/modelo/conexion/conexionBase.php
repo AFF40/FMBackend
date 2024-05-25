@@ -1,4 +1,5 @@
 <?php
+
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
@@ -7,8 +8,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method == "OPTIONS") {
     die();
 }
-session_start();
+
+if(session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 $_SESSION['nombre']="";
+
 class conexionBase{
 // Definicion de atributos
     private $host;
@@ -67,7 +73,8 @@ class conexionBase{
     public function SetFreeResult($result){
 //Metodo que libera el resultado del query.
         $result->free_result();
+ 
     }
-
+    
 }
 ?>

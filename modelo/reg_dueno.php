@@ -20,19 +20,38 @@ $passwordD = $_POST["passwordD"];
 
 // Validar la longitud del nombre de usuario
 if (strlen($username) < 6) {
-    die("El nombre de usuario debe tener al menos 6 caracteres.");
+    die(json_encode(array('exito' => 0, 'msg' => "El nombre de usuario debe tener al menos 6 caracteres.")));
+}
+
+// Validar la longitud del número de teléfono
+if (strlen($celular) < 8 || !is_numeric($celular)) {
+    die(json_encode(array('exito' => 0, 'msg' => "El número de teléfono debe tener al menos 8 dígitos y solo contener números.")));
+}
+
+// Verificar si el nombre de usuario ya existe en la base de datos
+$sql_check_username = "SELECT id_usuario FROM usuarios WHERE username = ?";
+$stmt = $conn->prepare($sql_check_username);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    die(json_encode(array('exito' => 0, 'msg' => "El nombre de usuario ya está registrado.")));
 }
 
 // Verificar si el número de teléfono ya existe en la base de datos
 $sql_check_phone = "SELECT id_usuario FROM usuarios WHERE celular = ?";
 $stmt = $conn->prepare($sql_check_phone);
-$stmt->bind_param("i", $celular);
+$stmt->bind_param("s", $celular);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    die("El número de teléfono ya está registrado.");
+    die(json_encode(array('exito' => 0, 'msg' => "El número de teléfono ya está registrado.")));
 }
+
+// Hash de la contraseña
+$hashed_password = password_hash($passwordD, PASSWORD_DEFAULT);
 
 // Insertar los datos en la tabla "usuarios"
 $sql = "INSERT INTO usuarios (username, celular, password, id_rol) VALUES (?, ?, ?, 2)";
@@ -41,17 +60,17 @@ $sql = "INSERT INTO usuarios (username, celular, password, id_rol) VALUES (?, ?,
 $stmt = $conn->prepare($sql);
 if ($stmt) {
     // Vincular parámetros y ejecutar la consulta
-    $stmt->bind_param("sis", $username, $celular, $passwordD);
+    $stmt->bind_param("sss", $username, $celular, $hashed_password);
     if ($stmt->execute()) {
-        echo "Dueño registrado correctamente.";
+        echo json_encode(array('exito' => 1, 'msg' => "Dueño registrado correctamente."));
     } else {
-        echo "Error al registrar el usuario: " . $stmt->error;
+        echo json_encode(array('exito' => 0, 'msg' => "Error al registrar el usuario: " . $stmt->error));
     }
 
     // Cerrar la declaración y la conexión
     $stmt->close();
 } else {
-    echo "Error en la preparación de la consulta: " . $conn->error;
+    echo json_encode(array('exito' => 0, 'msg' => "Error en la preparación de la consulta: " . $conn->error));
 }
 
 // Cerrar la conexión a la base de datos
