@@ -18,7 +18,8 @@ if (isset($_GET['id_comida'])) {
     $id_comida = $_GET['id_comida'];
 
     // Sentencia SQL para eliminar el plato
-    $sql = "DELETE FROM platos WHERE id_plato = $id_comida";
+    $sql = "DELETE FROM meplat WHERE id_mepla = $id_comida";
+    echo $sql;
 
     if ($conn->query($sql) === TRUE) {
         echo "success"; // Eliminación exitosa

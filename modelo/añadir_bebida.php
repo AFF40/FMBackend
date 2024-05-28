@@ -32,59 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $descripcion = isset($data["descripcion"]) ? htmlspecialchars($data["descripcion"]) : "";
     $precio = isset($data["precio"]) ? floatval($data["precio"]) : 0;
     $restaurante_nombre = isset($data["restaurante_nombre"]) ? htmlspecialchars($data["restaurante_nombre"]) : "";
-    $restaurante_id = isset($data["restaurante_id"]) ? htmlspecialchars($data["restaurante_id"]) : "";
+    $restaurante_id = isset($data["restaurante_id"]) ? intval($data["restaurante_id"]) : 0;
     $imagen_base64 = isset($data["imagen"]) ? $data["imagen"] : "";
 
-    // Realiza la validación para cada campo (puedes agregar más validaciones según tus necesidades)
-    if (empty($nombre))  {
+    // Realiza la validación de los datos (puedes agregar más validaciones según tus necesidades)
+    if (empty($nombre) || empty($descripcion) || $precio <= 0 || empty($imagen_base64) || empty($restaurante_nombre) || empty($restaurante_id)) {
         $response = array(
             "error_code" => 400,
-            "error_message" => "Error: Por favor, llena el nombre de la bebida."
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
-
-    if (empty($descripcion)) {
-        $response = array(
-            "error_code" => 400,
-            "error_message" => "Error: Por favor, llena la descripción de la bebida."
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
-
-    if ($precio <= 0) {
-        $response = array(
-            "error_code" => 400,
-            "error_message" => "Error: Por favor, ingresa un precio válido."
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
-
-    if (empty($imagen_base64)) {
-        $response = array(
-            "error_code" => 400,
-            "error_message" => "Error: Por favor, selecciona una imagen para la bebida."
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
-
-    if (empty($restaurante_nombre)) {
-        $response = array(
-            "error_code" => 400,
-            "error_message" => "Error: Por favor, selecciona un restaurante."
-        );
-        echo json_encode($response);
-        exit; // Termina el script
-    }
-
-    if (empty($restaurante_id)) {
-        $response = array(
-            "error_code" => 400,
-            "error_message" => "Error: No se pudo obtener el ID del restaurante."
+            "error_message" => "Error: Por favor, llena todos los campos requeridos." . json_encode($data)
         );
         echo json_encode($response);
         exit; // Termina el script
@@ -125,79 +80,90 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit; // Termina el script
     }
 
-    
-require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
+    require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
 
-// Crear una instancia de la clase ConexionBase
-$conexionBase = new ConexionBase();
+    // Crear una instancia de la clase ConexionBase
+    $conexionBase = new ConexionBase();
 
-// Obtener la conexión
-$conn = $conexionBase->getConnection();
+    // Obtener la conexión
+    $conn = $conexionBase->getConnection();
 
-// Verificar la conexión
-if ($conn->connect_error) {
-    die("Conexión a la base de datos fallida: " . $conn->connect_error);
-}
+    // Verificar la conexión
+    if ($conn->connect_error) {
+        die("Conexión a la base de datos fallida: " . $conn->connect_error);
+    }
 
-    // Prepara la consulta SQL para insertar datos en la tabla "bebidas"
-    $sql = "INSERT INTO bebidas (id_rest, nombre, descripcion, precio, imagen) VALUES (?, ?, ?, ?, ?)";
+    // Verificar si el producto ya existe en la tabla "productos"
+    $sql_check = "SELECT id_producto FROM productos WHERE nombre = ?";
+    $stmt_check = $conn->prepare($sql_check);
+    $stmt_check->bind_param("s", $nombre);
+    $stmt_check->execute();
+    $result_check = $stmt_check->get_result();
 
-    // Prepara una sentencia SQL
-    $stmt = $conn->prepare($sql);
-    $ruta_completa_imagen = "http://localhost" . $ruta_imagen . $nombre_imagen;
+    if ($result_check->num_rows > 0) {
+        // El producto ya existe
+        $row = $result_check->fetch_assoc();
+        $producto_id = $row['id_producto'];
+    } else {
+        // El producto no existe, inserta un nuevo producto
+        $sql_insert_product = "INSERT INTO productos (nombre) VALUES (?)";
+        $stmt_insert_product = $conn->prepare($sql_insert_product);
+        $stmt_insert_product->bind_param("s", $nombre);
 
-    // Vincula los parámetros
-    $stmt->bind_param("issis", $restaurante_id, $nombre, $descripcion, $precio, $ruta_completa_imagen);
-
-    if ($stmt->execute()) {
-        // Éxito: Los datos se han insertado correctamente
-        $id_bebida = $conn->insert_id; // Obtiene el ID de la bebida insertada
-
-        // Prepara la consulta SQL para obtener el id_menu
-        $sql_menu = "SELECT id_menu FROM menus WHERE id_rest = ?";
-        $stmt_menu = $conn->prepare($sql_menu);
-        $stmt_menu->bind_param("i", $restaurante_id);
-        $stmt_menu->execute();
-        $result_menu = $stmt_menu->get_result();
-        $row_menu = $result_menu->fetch_assoc();
-        $id_menu = $row_menu['id_menu'];
-
-        // Prepara la consulta SQL para insertar datos en la tabla "menu_bebidas"
-        $sql_menu_bebidas = "INSERT INTO menu_bebidas (id_menu, id_bebida) VALUES (?, ?)";
-        $stmt_menu_bebidas = $conn->prepare($sql_menu_bebidas);
-        $stmt_menu_bebidas->bind_param("ii", $id_menu, $id_bebida);
-
-        if ($stmt_menu_bebidas->execute()) {
-            // Éxito: Los datos se han insertado correctamente en la tabla "menu_bebidas"
-            $response = array(
-                "success" => true,
-                "message" => "Bebida y menú agregados con éxito"
-            );
-            echo json_encode($response);
+        if ($stmt_insert_product->execute()) {
+            // Éxito: El producto se ha insertado correctamente
+            $producto_id = $conn->insert_id;
         } else {
-            // Error: No se pudieron insertar los datos en la tabla "menu_bebidas"
+            // Error: No se pudieron insertar los datos del producto
             $response = array(
                 "error_code" => 500,
-                "error_message" => "Error al insertar en la tabla menu_bebidas: " . $stmt_menu_bebidas->error
+                "error_message" => "Error al insertar el producto: " . $stmt_insert_product->error
             );
             echo json_encode($response);
+            $stmt_insert_product->close();
+            $conn->close();
+            exit; // Termina el script
         }
 
-        $stmt_menu_bebidas->close();
-        $stmt_menu->close();
+        $stmt_insert_product->close();
+    }
+
+    $stmt_check->close();
+
+    // Obtener el id_menu
+    $sql_menu = "SELECT id_menu FROM menus WHERE id_rest = ?";
+    $stmt_menu = $conn->prepare($sql_menu);
+    $stmt_menu->bind_param("i", $restaurante_id);
+    $stmt_menu->execute();
+    $result_menu = $stmt_menu->get_result();
+    $row_menu = $result_menu->fetch_assoc();
+    $id_menu = $row_menu['id_menu'];
+    $ruta_completa_imagen = "http://localhost" . $ruta_completa_imagen;
+    // Insertar en la tabla "mebeb"
+    $sql_mebeb = "INSERT INTO mebeb (id_menu, id_producto, descripcion, precio, disponible, imagen) VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt_mebeb = $conn->prepare($sql_mebeb);
+    $disponible = 1; // Asumimos que la bebida está disponible
+    $stmt_mebeb->bind_param("iisdss", $id_menu, $producto_id, $descripcion, $precio, $disponible, $ruta_completa_imagen);
+
+    if ($stmt_mebeb->execute()) {
+        // Éxito: Los datos se han insertado correctamente en la tabla "mebeb"
+        $response = array(
+            "success" => true,
+            "message" => "Bebida agregada con éxito"
+        );
+        echo json_encode($response);
     } else {
-        // Error: No se pudieron insertar los datos
+        // Error: No se pudieron insertar los datos en la tabla "mebeb"
         $response = array(
             "error_code" => 500,
-            "error_message" => "Error al insertar la bebida: " . $stmt->error
+            "error_message" => "error: " . $stmt_mebeb->error
         );
         echo json_encode($response);
     }
 
-    // Cierra la conexión a la base de datos
-    $stmt->close();
+    $stmt_mebeb->close();
+    $stmt_menu->close();
     $conn->close();
-
 } else {
     // Si no se recibieron los datos por POST, muestra un mensaje de error
     $response = array(

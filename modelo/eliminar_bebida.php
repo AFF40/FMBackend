@@ -18,11 +18,11 @@ if (isset($_GET['id_bebida'])) {
     $id_bebida = $_GET['id_bebida'];
 
     // Sentencia SQL para eliminar los registros relacionados en la tabla menu_bebidas
-    $sql_delete_menu_bebidas = "DELETE FROM menu_bebidas WHERE id_bebida = $id_bebida";
+    $sql_delete_menu_bebidas = "DELETE FROM mebeb WHERE id_mebeb = $id_bebida";
 
     if ($conn->query($sql_delete_menu_bebidas) === TRUE) {
         // Ahora que los registros relacionados en menu_bebidas han sido eliminados, procedemos con la eliminación de la bebida en sí
-        $sql_delete_bebida = "DELETE FROM bebidas WHERE id_bebida = $id_bebida";
+        $sql_delete_bebida = "DELETE FROM mebeb WHERE id_mebeb = $id_bebida";
 
         if ($conn->query($sql_delete_bebida) === TRUE) {
             echo "success"; // Eliminación exitosa

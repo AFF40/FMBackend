@@ -20,14 +20,13 @@ if (isset($_GET['restaurante_id'])) {
     die("ID de restaurante no proporcionado en la URL");
 }
 
-// Realiza la consulta SQL para obtener los platos del restaurante
-//$sql = "SELECT id_comida,nom_plato, descripcion, precio,disponible, imagen FROM platos WHERE restaurante_id = $restaurante_id";
-$sql = "SELECT p.*, m.*, mp.* , res.id_rest 
-FROM platos p 
-JOIN menu_platos mp ON p.id_plato = mp.id_plato 
-JOIN menus m ON mp.id_menu = m.id_menu 
-JOIN restaurantes res ON m.id_rest = res.id_rest 
-WHERE p.id_rest AND res.id_rest = '$restaurante_id';";
+// Realiza la consulta SQL para obtener los productos del restaurante
+$sql = "SELECT p.*, m.*, mp.*, res.id_rest 
+        FROM productos p 
+        JOIN meplat mp ON p.id_producto = mp.id_producto 
+        JOIN menus m ON mp.id_menu = m.id_menu 
+        JOIN restaurantes res ON m.id_rest = res.id_rest 
+        WHERE res.id_rest = '$restaurante_id';";
 
 $result = $conn->query($sql);
     
@@ -36,18 +35,16 @@ if (!$result) {
 }
 
 // Prepara un arreglo para almacenar los resultados
-$platos = array();
+$productos = array();
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $platos[] = $row;
+        $productos[] = $row;
     }
 }
 
-
-
 // Devuelve los resultados en formato JSON
-echo json_encode($platos);
+echo json_encode($productos);
 
 // Cierra la conexión a la base de datos
 $conn->close();
