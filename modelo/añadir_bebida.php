@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $producto_id = $row['id_producto'];
     } else {
         // El producto no existe, inserta un nuevo producto
-        $sql_insert_product = "INSERT INTO productos (nombre) VALUES (?)";
+        $sql_insert_product = "INSERT INTO productos (nombre, created_at, updated_at) VALUES (?, NOW(), NOW())";
         $stmt_insert_product = $conn->prepare($sql_insert_product);
         $stmt_insert_product->bind_param("s", $nombre);
 
@@ -139,11 +139,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $row_menu = $result_menu->fetch_assoc();
     $id_menu = $row_menu['id_menu'];
     $ruta_completa_imagen = "http://localhost" . $ruta_completa_imagen;
+
     // Insertar en la tabla "mebeb"
-    $sql_mebeb = "INSERT INTO mebeb (id_menu, id_producto, descripcion, precio, disponible, imagen) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql_mebeb = "INSERT INTO mebeb (id_menu, id_producto, descripcion, precio, disponible, imagen, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
     $stmt_mebeb = $conn->prepare($sql_mebeb);
     $disponible = 1; // Asumimos que la bebida está disponible
     $stmt_mebeb->bind_param("iisdss", $id_menu, $producto_id, $descripcion, $precio, $disponible, $ruta_completa_imagen);
+    
     if ($stmt_mebeb->execute()) {
         // Éxito: Los datos se han insertado correctamente en la tabla "mebeb"
         $response = array(
@@ -166,11 +168,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 } else {
     // Si no se recibieron los datos por POST, muestra un mensaje de error
     $response = array(
-    "error_code" => 400,
-    "error_message" => "Error: Este script solo acepta solicitudes POST."
+        "error_code" => 400,
+        "error_message" => "Error: Este script solo acepta solicitudes POST."
     );
     echo json_encode($response);
-    }
-    ?>     
-    
-
+}
+?>

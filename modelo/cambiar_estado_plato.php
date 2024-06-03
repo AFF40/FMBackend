@@ -18,7 +18,7 @@ if (isset($_GET['id_comida'])) {
     $id_comida = $_GET['id_comida'];
 
     // Consulta para obtener el valor actual de "disponible"
-    $selectQuery = "SELECT disponible FROM meplat WHERE id_producto = $id_comida"; 
+    $selectQuery = "SELECT disponible FROM meplat WHERE id_meplat = $id_comida"; 
     
     $result = $conn->query($selectQuery);
 
@@ -28,9 +28,9 @@ if (isset($_GET['id_comida'])) {
 
         // Actualiza el estado del plato
         if ($disponible == 1) {
-            $updateQuery = "UPDATE meplat SET disponible = 0 WHERE id_producto = $id_comida ";
+            $updateQuery = "UPDATE meplat SET disponible = 0 WHERE id_meplat = $id_comida ";
         } else {
-            $updateQuery = "UPDATE meplat SET disponible = 1 WHERE id_producto = $id_comida ";
+            $updateQuery = "UPDATE meplat SET disponible = 1 WHERE id_meplat = $id_comida ";
         }
 
         if ($conn->query($updateQuery) === TRUE) {

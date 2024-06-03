@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $producto_id = $row['id_producto'];
     } else {
         // El producto no existe, inserta un nuevo producto
-        $sql_insert_product = "INSERT INTO productos (nombre) VALUES (?)";
+        $sql_insert_product = "INSERT INTO productos (nombre, created_at, updated_at) VALUES (?, NOW(), NOW())";
         $stmt_insert_product = $conn->prepare($sql_insert_product);
         $stmt_insert_product->bind_param("s", $nombre);
 
@@ -139,8 +139,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $row_menu = $result_menu->fetch_assoc();
     $id_menu = $row_menu['id_menu'];
     $ruta_completa_imagen = "http://localhost" . $ruta_completa_imagen;
+
     // Insertar en la tabla "meplat"
-    $sql_meplat = "INSERT INTO meplat (id_menu, id_producto, descripcion, precio, disponible, imagen) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql_meplat = "INSERT INTO meplat (id_menu, id_producto, descripcion, precio, disponible, imagen, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
     $stmt_meplat = $conn->prepare($sql_meplat);
     $disponible = 1; // Asumimos que el plato está disponible
     $stmt_meplat->bind_param("iisdss", $id_menu, $producto_id, $descripcion, $precio, $disponible, $ruta_completa_imagen);

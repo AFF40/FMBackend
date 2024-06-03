@@ -18,7 +18,7 @@ if (isset($_GET['id_bebida'])) {
     $id_bebida = $_GET['id_bebida'];
 
     // Consulta para obtener el valor actual de "disponible"
-    $selectQuery = "SELECT disponible FROM mebeb WHERE id_producto = $id_bebida";
+    $selectQuery = "SELECT disponible FROM mebeb WHERE id_mebeb = $id_bebida";
     
     $result = $conn->query($selectQuery);
 
@@ -28,9 +28,9 @@ if (isset($_GET['id_bebida'])) {
 
         // Actualiza el estado del plato
         if ($disponible == 1) {
-            $updateQuery = "UPDATE mebeb SET disponible = 0 WHERE id_producto = $id_bebida ";
+            $updateQuery = "UPDATE mebeb SET disponible = 0 WHERE id_mebeb = $id_bebida ";
         } else {
-            $updateQuery = "UPDATE mebeb SET disponible = 1 WHERE id_producto = $id_bebida ";
+            $updateQuery = "UPDATE mebeb SET disponible = 1 WHERE id_mebeb = $id_bebida ";
         }
 
         if ($conn->query($updateQuery) === TRUE) {
