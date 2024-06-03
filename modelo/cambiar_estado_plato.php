@@ -28,9 +28,9 @@ if (isset($_GET['id_comida'])) {
 
         // Actualiza el estado del plato
         if ($disponible == 1) {
-            $updateQuery = "UPDATE platos SET meplat = 0 WHERE id_producto = $id_comida ";
+            $updateQuery = "UPDATE meplat SET disponible = 0 WHERE id_producto = $id_comida ";
         } else {
-            $updateQuery = "UPDATE platos SET meplat = 1 WHERE id_producto = $id_comida ";
+            $updateQuery = "UPDATE meplat SET disponible = 1 WHERE id_producto = $id_comida ";
         }
 
         if ($conn->query($updateQuery) === TRUE) {

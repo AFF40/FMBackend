@@ -1,127 +1,90 @@
 <?php
-// Establecer la cabecera de contenido como JSON
-header('Content-Type: application/json');
-
-// Verificar que la solicitud sea un POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(["success" => false, "error_message" => "Error: Este script solo acepta solicitudes POST."]);
-    exit;
-}
-
-// Leer los datos JSON del cuerpo de la solicitud
-$json_data = file_get_contents('php://input');
-error_log("JSON Data: " . $json_data); // Línea de depuración
-
-// Verificar si la cadena JSON está vacía
-if (empty($json_data)) {
-    echo json_encode(["success" => false, "error_message" => "Error: No se recibieron datos JSON."]);
-    exit;
-}
-
-// Decodificar los datos JSON en un arreglo asociativo
-$data = json_decode($json_data, true);
-error_log("Decoded Data: " . print_r($data, true)); // Línea de depuración
-
-// Verificar si se pudo decodificar el JSON correctamente
-if (is_null($data)) {
-    echo json_encode(["success" => false, "error_message" => "Error: No se pudieron decodificar los datos JSON."]);
-    exit;
-}
-
-// Recuperar los valores del arreglo
-$bebida_id = isset($data["bebida_id"]) ? intval($data["bebida_id"]) : 0;
-$nombre = isset($data["nombre_bebida"]) ? htmlspecialchars($data["nombre_bebida"]) : "";
-$descripcion = isset($data["descripcion_bebida"]) ? htmlspecialchars($data["descripcion_bebida"]) : "";
-$precio = isset($data["precio_bebida"]) ? floatval($data["precio_bebida"]) : 0;
-$imagen_base64 = isset($data["imagen_bebida"]) ? $data["imagen_bebida"] : "";
-$restaurante_nombre = isset($data["nombre_restaurante"]) ? htmlspecialchars($data["nombre_restaurante"]) : "";
-
-// Verificar los datos recibidos
-if ($bebida_id === 0) {
-    echo json_encode(["success" => false, "error_message" => "Error: ID de bebida no proporcionado."]);
-    exit;
-}
-if (empty($nombre)) {
-    echo json_encode(["success" => false, "error_message" => "Error: Nombre de la bebida no proporcionado."]);
-    exit;
-}
-if (empty($descripcion)) {
-    echo json_encode(["success" => false, "error_message" => "Error: Descripción de la bebida no proporcionada."]);
-    exit;
-}
-if ($precio === 0) {
-    echo json_encode(["success" => false, "error_message" => "Error: Precio de la bebida no proporcionado."]);
-    exit;
-}
-if (empty($imagen_base64)) {
-    echo json_encode(["success" => false, "error_message" => "Error: Imagen de la bebida no proporcionada."]);
-    exit;
-}
-if (empty($restaurante_nombre)) {
-    echo json_encode(["success" => false, "error_message" => "Error: Nombre del restaurante no proporcionado."]);
-    exit;
-}
-
-// Decodificar la imagen Base64
-$imagen = base64_decode($imagen_base64);
-
-// Verificar si la imagen se decodificó correctamente
-if ($imagen === false) {
-    echo json_encode(["success" => false, "error_message" => "Error: La imagen proporcionada no es válida."]);
-    exit;
-}
-
-// Ruta donde se guardará la imagen
-$ruta_imagen = "/foodmapsBD/restaurantes/" . preg_replace('/[^A-Za-z0-9\-]/', '', $restaurante_nombre) . "/bebidas/";
-
-// Verificar si la carpeta existe, si no existe, crearla
-$ruta_completa = $_SERVER['DOCUMENT_ROOT'] . $ruta_imagen;
-if (!file_exists($ruta_completa) && !mkdir($ruta_completa, 0777, true)) {
-    echo json_encode(["success" => false, "error_message" => "Error: No se pudo crear la carpeta de la imagen."]);
-    exit;
-}
-
-// Nombre del archivo de imagen (bebida_"numero_asendente")
-$nombre_imagen = "bebida_" . uniqid() . ".jpg";
-$ruta_completa_imagen = $ruta_imagen . $nombre_imagen;
-
-// Guardar la imagen en el servidor
-if (!file_put_contents($_SERVER['DOCUMENT_ROOT'] . $ruta_completa_imagen, $imagen)) {
-    echo json_encode(["success" => false, "error_message" => "Error: No se pudo guardar la imagen en el servidor."]);
-    exit;
-}
-
-// Conexión a la base de datos
 require_once "conexion/conexionBase.php"; // Incluir el archivo de conexión
-$conexionBase = new ConexionBase();
-$mysqli = $conexionBase->getConnection();
 
-// Verificar la conexión a la base de datos
-if ($mysqli->connect_error) {
-    echo json_encode(["success" => false, "error_message" => "Error: Conexión fallida: " . $mysqli->connect_error]);
+// Crear una instancia de la clase ConexionBase
+$conexionBase = new ConexionBase();
+
+// Obtener la conexión
+$conn = $conexionBase->getConnection();
+
+// Verificar la conexión
+if ($conn->connect_error) {
+    die(json_encode(array("success" => false, "error_message" => "Conexión a la base de datos fallida: " . $conn->connect_error)));
+}
+
+// Obtener los datos enviados desde la aplicación Android
+$data = json_decode(file_get_contents("php://input"), true);
+
+if (!$data) {
+    echo json_encode(array("success" => false, "error_message" => "Datos no válidos"));
     exit;
 }
 
-// Prepara la consulta SQL para actualizar los datos en la tabla "bebidas"
-$sql = "UPDATE bebidas SET nombre = ?, descripcion = ?, precio = ?, imagen = ? WHERE id_bebida = ?";
+$id_mebeb = $data['id_mebeb']; // id_producto recibido desde la app
+$nombre_bebida = $data['nombre_bebida'];
+$descripcion_bebida = $data['descripcion_bebida'];
+$precio_bebida = $data['precio_bebida'];
+$imagen_bebida = $data['imagen_bebida'];
+$id_rest = $data['restaurante_id']; // Asumiendo que id_rest está presente en los datos enviados
 
-// Prepara una sentencia SQL
-$stmt = $mysqli->prepare($sql);
-$ruta_completa_imagen = "http://localhost" . $ruta_completa_imagen;
+// Obtener el id_menu de la tabla menus utilizando el id_rest
+$sql_menu = "SELECT id_menu FROM menus WHERE id_rest = $id_rest";
+$result_menu = $conn->query($sql_menu);
 
-// Vincular los parámetros
-$stmt->bind_param("ssdsi", $nombre, $descripcion, $precio, $ruta_completa_imagen, $bebida_id);
+if ($result_menu->num_rows > 0) {
+    $row_menu = $result_menu->fetch_assoc();
+    $id_menu = $row_menu['id_menu'];
 
-// Ejecutar la sentencia SQL
-if ($stmt->execute()) {
-    // Éxito: Los datos se han actualizado correctamente
-    echo json_encode(["success" => true]);
+    // Verificar si el nombre de la bebida ya existe en la tabla productos
+    $sql_producto = "SELECT id_producto FROM productos WHERE nombre = '$nombre_bebida'";
+    $result_producto = $conn->query($sql_producto);
+
+    if ($result_producto->num_rows > 0) {
+        // El nombre de la bebida ya existe en productos, usar id_producto existente
+        $row_producto = $result_producto->fetch_assoc();
+        $id_producto = $row_producto['id_producto'];
+    } else {
+        // Insertar el nuevo nombre_bebida en la tabla productos
+        $insert_sql_productos = "INSERT INTO productos (nombre, created_at, updated_at) VALUES ('$nombre_bebida', NOW(), NOW())";
+        if ($conn->query($insert_sql_productos) === TRUE) {
+            // Obtener el id_producto recién insertado del row  
+            $id_producto = $conn->insert_id;     
+        } else {
+            echo json_encode(array("success" => false, "error_message" => "Error al insertar la nueva bebida en la tabla productos: " . $conn->error));
+            exit;
+        }
+    }
+
+    // Volver a consultar para obtener el id_producto recién insertado
+    $sql_producto_nuevo = "SELECT id_producto FROM productos WHERE nombre = '$nombre_bebida'";
+    $result_producto_nuevo = $conn->query($sql_producto_nuevo);
+
+    if ($result_producto_nuevo->num_rows > 0) {
+        $row_producto_nuevo = $result_producto_nuevo->fetch_assoc();
+        $id_productonuevo = $row_producto_nuevo['id_producto'];
+    }
+    // Obtener el id_mebeb de la tabla mebeb usando los datos POST
+    $sql_mebeb = "SELECT id_mebeb FROM mebeb WHERE descripcion = '$descripcion_bebida' AND id_menu = $id_menu ";
+    $result_mebeb = $conn->query($sql_mebeb);
+
+    if ($result_mebeb->num_rows > 0) {
+        $row_mebeb = $result_mebeb->fetch_assoc();
+        $id_mebeb = $row_mebeb['id_mebeb'];
+
+        // Actualizar los detalles de la bebida en la tabla mebeb
+        $update_sql_mebeb = "UPDATE mebeb SET id_producto = $id_producto, descripcion = '$descripcion_bebida', precio = $precio_bebida, id_menu = $id_menu, updated_at = NOW() WHERE id_mebeb = $id_mebeb";
+        if ($conn->query($update_sql_mebeb) === TRUE) {
+            echo json_encode(array("success" => true));
+        } else {
+            echo json_encode(array("success" => false, "error_message" => "Error al actualizar los detalles de la bebida: " . $conn->error));
+        }
+    } else {
+        echo json_encode(array("success" => false, "error_message" => "No se encontró el id_mebeb correspondiente en la tabla mebeb para los datos proporcionados"));
+    }
 } else {
-    // Error: No se pudieron actualizar los datos
-    echo json_encode(["success" => false, "error_message" => "Error al actualizar la bebida: " . $stmt->error]);
+    echo json_encode(array("success" => false, "error_message" => "No se encontró el id_menu para el id_rest proporcionado"));
 }
 
-// Cierra la conexión a la base de datos
-$stmt->close();
-$conexionBase->closeConnection();
+// Cerrar la conexión
+$conn->close();
 ?>

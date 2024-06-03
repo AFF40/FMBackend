@@ -62,7 +62,7 @@ if ($stmt) {
     // Vincular parámetros y ejecutar la consulta
     $stmt->bind_param("sss", $username, $celular, $hashed_password);
     if ($stmt->execute()) {
-        echo json_encode(array('exito' => 1, 'msg' => "Dueño registrado correctamente."));
+        echo json_encode(array('exito' => 1, 'msg' => " registrado correctamente."));
     } else {
         echo json_encode(array('exito' => 0, 'msg' => "Error al registrar el usuario: " . $stmt->error));
     }

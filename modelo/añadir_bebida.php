@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // Nombre del archivo de imagen (bebida_"numero_asendente"))
+    // Nombre del archivo de imagen (bebida_"numero_aleatorio"))
     $nombre_imagen = "bebida_" . uniqid() . ".jpg"; // Puedes cambiar la extensión según el tipo de imagen
 
     // Ruta completa donde se guardará la imagen
@@ -144,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt_mebeb = $conn->prepare($sql_mebeb);
     $disponible = 1; // Asumimos que la bebida está disponible
     $stmt_mebeb->bind_param("iisdss", $id_menu, $producto_id, $descripcion, $precio, $disponible, $ruta_completa_imagen);
-
     if ($stmt_mebeb->execute()) {
         // Éxito: Los datos se han insertado correctamente en la tabla "mebeb"
         $response = array(
@@ -160,16 +159,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         );
         echo json_encode($response);
     }
-
+    
     $stmt_mebeb->close();
     $stmt_menu->close();
     $conn->close();
 } else {
     // Si no se recibieron los datos por POST, muestra un mensaje de error
     $response = array(
-        "error_code" => 400,
-        "error_message" => "Error: Este script solo acepta solicitudes POST."
+    "error_code" => 400,
+    "error_message" => "Error: Este script solo acepta solicitudes POST."
     );
     echo json_encode($response);
-}
-?>
+    }
+    ?>     
+    
+

@@ -15,10 +15,10 @@ if ($conn->connect_error) {
 
 // Comprueba si se proporciona el ID del plato en la solicitud GET
 if (isset($_GET['id_comida'])) {
-    $id_comida = $_GET['id_comida'];
+    $id_comida = $_GET['id_comida']; // Corrige la clave aquí
 
     // Sentencia SQL para eliminar el plato
-    $sql = "DELETE FROM meplat WHERE id_mepla = $id_comida";
+    $sql = "DELETE FROM meplat WHERE id_meplat = $id_comida"; // Corrige el nombre de la columna aquí
     echo $sql;
 
     if ($conn->query($sql) === TRUE) {
