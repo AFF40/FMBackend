@@ -1,5 +1,5 @@
 <?php
-$password = "foodmapsadmin";
+$password = "aaaaaa";
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 echo "Contraseña original: $password\n";

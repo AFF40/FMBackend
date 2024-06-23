@@ -23,12 +23,16 @@ class Login
     //valida si la persona existe
     function validar() {
         $this->con->CreateConnection();
-        $sql = "SELECT * FROM usuarios WHERE username = '$this->username'";
-        $resp = $this->con->ExecuteQuery($sql);
-        $re = $this->con->GetCountAffectedRows($resp);
         
-        if ($re > 0) {
-            $usuario = mysqli_fetch_assoc($resp);
+        // Utilizando declaraciones preparadas para prevenir la inyección SQL
+        $sql = "SELECT * FROM usuarios WHERE username = ?";
+        $stmt = $this->con->getConnection()->prepare($sql);
+        $stmt->bind_param("s", $this->username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $usuario = $result->fetch_assoc();
             $hashed_password = $usuario['password'];
             
             if (password_verify($this->password, $hashed_password)) {
@@ -44,5 +48,11 @@ class Login
         } else {
             echo json_encode(array('exito' => 0, 'msg' => "Nombre de usuario o contraseña incorrecto"));
         }
+        
+        // Cierra la declaración preparada
+        $stmt->close();
+        // Cierra la conexión a la base de datos
+        $this->con->getConnection()->close();
     }
 }
+?>

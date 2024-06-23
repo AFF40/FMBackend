@@ -1,4 +1,18 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
+
+// Función para limpiar y normalizar nombres de carpeta
+function limpiarNombre($cadena) {
+    // Define los caracteres permitidos en el nombre de carpeta
+    $permitidos = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-\ñÑ";
+
+    // Elimina caracteres no permitidos y espacios
+    $cadena = trim($cadena);
+    $cadena = preg_replace('/[^\ñ\Ñ'.$permitidos.']/', '', $cadena);
+
+    return $cadena;
+}
+
 // Verifica si se reciben los datos del formulario a través de POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Lee los datos JSON del cuerpo de la solicitud
@@ -39,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($nombre) || empty($descripcion) || $precio <= 0 || empty($imagen_base64) || empty($restaurante_nombre) || empty($restaurante_id)) {
         $response = array(
             "error_code" => 400,
-            "error_message" => "Error: Por favor, llena todos los campos requeridos." . json_encode($data)
+            "error_message" => "Error: Por favor, llena todos los campos requeridos."
         );
         echo json_encode($response);
         exit; // Termina el script
@@ -48,8 +62,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Decodifica la imagen Base64
     $imagen = base64_decode($imagen_base64);
 
-    // Ruta donde se guardará la imagen
-    $ruta_imagen = "/foodmapsBD/restaurantes/" . preg_replace('/[^A-Za-z0-9\-]/', '', $restaurante_nombre) . "/platos/";
+    // Limpia el nombre del restaurante para la carpeta
+    $ruta_imagen = "/foodmapsBD/restaurantes/" . limpiarNombre($restaurante_nombre) . "/platos/";
 
     // Verifica si la carpeta existe, si no existe, la crea
     $ruta_completa = $_SERVER['DOCUMENT_ROOT'] . $ruta_imagen;
