@@ -97,9 +97,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && json_last_error() === JSON_ERROR_NON
         echo json_encode(array('success' => false, 'error_message' => 'No se encontró el menú para el restaurante especificado.'));
         die();
     }
-
+    
     $stmt_get_menu_id->close();
-
     // Limpieza y normalización del nombre del restaurante para la carpeta
     $nombre_restaurante_clean = limpiarNombre($nombre_restaurante);
 
@@ -125,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && json_last_error() === JSON_ERROR_NON
     $url_imagen = "http://localhost" . $ruta_imagen;
 
     // Preparar la consulta SQL para actualizar el plato en la tabla "meplat"
-    $sql_update_plato = "UPDATE meplat SET descripcion = ?, precio = ?, imagen = ?, id_producto = ?, id_menu = ?, created_at= NOW(), updated_at=NOW() WHERE id_meplat = ?";
+    $sql_update_plato = "UPDATE meplat SET descripcion = ?, precio = ?, imagen = ?, id_producto = ?, id_menu = ?, updated_at=NOW() WHERE id_meplat = ?";
     $stmt_update_plato = $conn->prepare($sql_update_plato);
     $stmt_update_plato->bind_param("sdssii", $descripcion_plato, $precio_plato, $url_imagen, $id_producto, $id_menu, $id_meplat);
 
