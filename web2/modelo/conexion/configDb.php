@@ -2,9 +2,10 @@
 /*define('HOST', 'localhost'); 
 define('USER', 'infocal_aflores');
 define('PASSWORD', 'foodmapsAFFA');
-define('DATABASE', 'infocal_base2');*/
+define('DATABASE', 'infocal_base3');
+*/
 define('HOST', 'localhost'); 
 define('USER', 'root');
 define('PASSWORD', '1234');
-define('DATABASE', 'androidbd');
+define('DATABASE', 'androidbd');    
 ?>

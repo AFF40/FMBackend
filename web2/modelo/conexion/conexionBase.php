@@ -1,80 +1,55 @@
 <?php
 
-header('Access-Control-Allow-Origin: *');
-header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-header("Allow: GET, POST, OPTIONS, PUT, DELETE");
-$method = $_SERVER['REQUEST_METHOD'];
-if ($method == "OPTIONS") {
-    die();
-}
-
-if(session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
-
-$_SESSION['nombre']="";
-
-class conexionBase{
-// Definicion de atributos
+class conexionBase {
     private $host;
     private $user;
     private $password;
     private $database;
     private $conn;
-    
+
     public function getConnection() {
         $this->CreateConnection();
         return $this->conn;
     }
 
-    public function __construct(){
-//Constructor
+    public function __construct() {
         require_once "configDb.php";
-        $this->host=HOST;
-        $this->user=USER;
-        $this->password=PASSWORD;
-        $this->database=DATABASE;
-
+        $this->host = HOST;
+        $this->user = USER;
+        $this->password = PASSWORD;
+        $this->database = DATABASE;
     }
 
-    public function CreateConnection(){
-// Metodo que crea y retorna la conexion a la BD.
+    public function CreateConnection() {
         $this->conn = new mysqli($this->host, $this->user, $this->password, $this->database);
-        if($this->conn->connect_errno) {
-            die("Error al conectarse a MySQL: (" . $this->conn->connect_errno . ") " . $this->conn->connect_error);
+
+        if ($this->conn->connect_errno) {
+            die("Error al conectarse a MariaDB: (" . $this->conn->connect_errno . ") " . $this->conn->connect_error);
         }
+
+        // Establecer el juego de caracteres a UTF-8 (opcional, pero recomendado)
+        $this->conn->set_charset("utf8");
     }
 
-    public function CloseConnection(){
-//Metodo que cierra la conexion a la BD
+    public function CloseConnection() {
         $this->conn->close();
     }
 
-    public function ExecuteQuery($sql){
-        /* Metodo que ejecuta un query sql
-         Retorna un resultado si es un SELECT*/
+    public function ExecuteQuery($sql) {
         $result = $this->conn->query($sql);
         return $result;
     }
 
-    public function GetCountAffectedRows(){
-        /* Metodo que retorna la cantidad de filas
-         afectadas con el ultimo query realizado.*/
+    public function GetCountAffectedRows($result) {
         return $this->conn->affected_rows;
     }
 
-    public function GetRows($result){
-        /*Metodo que retorna la ultima fila
-         de un resultado en forma de arreglo.*/
-        return $result->fetch_row();
+    public function GetRows($result) {
+        return $result->fetch_assoc(); // Usar fetch_assoc para obtener un arreglo asociativo
     }
 
-    public function SetFreeResult($result){
-//Metodo que libera el resultado del query.
+    public function SetFreeResult($result) {
         $result->free_result();
- 
     }
-    
 }
 ?>

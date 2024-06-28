@@ -1,5 +1,5 @@
 <?php
-include "../modelo/Login.php";
+include "../modelo/login.php";
 $per = new Login();
 
 if ($_POST) {
